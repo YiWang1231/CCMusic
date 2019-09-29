@@ -67,7 +67,7 @@ export function getSongUrl(song) {
     url = getSongVkey(song.mid).then(res => {
         if (res.code === ERR_OK) {
             let temp_url = res.req_0.data.midurlinfo[0].purl;
-            return temp_url ? `http://ws.stream.qqmusic.qq.com/${temp_url}` : "http://ws.stream.qqmusic.qq.com"
+            return temp_url ? `http://ws.stream.qqmusic.qq.com/${temp_url}` : ""
         }
     })
     return url

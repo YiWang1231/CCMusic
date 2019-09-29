@@ -298,9 +298,7 @@ export default {
       }
       this.setCurrentIndex(index);
       // 歌曲准备完毕的标志位
-      console.log(this.songReady);
       this.songReady = false;
-      console.log(this.songReady);
     },
     prevSong() {
       if (!this.songReady) {
@@ -428,8 +426,6 @@ export default {
   },
   watch: {
     currentSong(newSong, oldSong) {
-      console.log(typeof newSong);
-      // console.log(!newSong.id);
       if (newSong.id) {
         this.savePlayHistory(newSong);
       }
@@ -448,11 +444,17 @@ export default {
       });
 
       setTimeout(() => {
-        // console.log(this.$refs.audio.error);
-        this.songReady = true;
-        this.$refs.audio.play();
-        this.setPlayingState(true);
-        this.getLyric();
+        console.log(!this.songUrl);
+        if (this.songUrl) {
+          this.songReady = true;
+          this.$refs.audio.play();
+          this.setPlayingState(true);
+          this.getLyric();
+        } else {
+          setTimeout(() => {
+            this.nextSong();
+          }, 200);
+        }
       }, 500);
     },
     playing(newPlaying) {
