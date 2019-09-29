@@ -1,0 +1,163 @@
+<template>
+  <transition>
+    <div class="add-song" v-show="showFlag">
+      <div class="header">
+        <span class="text">添加歌曲播放列表</span>
+        <span class="close" @click="hide">
+          <i class="icon-close"></i>
+        </span>
+      </div>
+      <div class="search-box-wrapper">
+        <searchBox ref="searchBox" @query="onQueryChange"></searchBox>
+      </div>
+      <div class="shortcut" v-show="!query">
+        <switches :switches="switches" :currentIndex="currentIndex" @switch="switchItem"></switches>
+        <div class="list-wrapper">
+          <scroll class="list-scroll" v-if="currentIndex===0">
+            <div class="list-inner">
+              <song-list :songs="playHistory" @select="selectSong"></song-list>
+            </div>
+          </scroll>
+          <scroll class="list-scroll" v-if="currentIndex===1" :data="searchHistory">
+            <div class="list-inner">
+              <search-history
+                :searches="searchHistory"
+                @select="addQuery"
+                @delete="deleteSearchHistory"
+              ></search-history>
+            </div>
+          </scroll>
+        </div>
+      </div>
+      <div class="search-result" v-show="query">
+        <suggest
+          :query="query"
+          :showSinger="showSinger"
+          @listScroll="blurInput"
+          @select="selectSuggest"
+        ></suggest>
+      </div>
+    </div>
+  </transition>
+</template>
+<script>
+import searchBox from "@/base/search-box/search-box";
+import Suggest from "@/components/suggest/suggest";
+import { searchMixin } from "@/common/js/mixin";
+import Switches from "@/base/switches/switches";
+import SearchHistory from "@/base/search-history/search-history";
+import Scroll from "@/base/scroll/scroll";
+import SongList from "@/base/song-list/song-list";
+import { mapGetters, mapActions } from "vuex";
+import Song from "@/common/js/song";
+export default {
+  mixins: [searchMixin],
+  data() {
+    return {
+      showFlag: false,
+      showSinger: false,
+      currentIndex: 0,
+      switches: [
+        {
+          name: "最近播放"
+        },
+        {
+          name: "搜索历史"
+        }
+      ]
+    };
+  },
+  components: {
+    searchBox,
+    Suggest,
+    Switches,
+    SearchHistory,
+    Scroll,
+    SongList
+  },
+  methods: {
+    hide() {
+      this.showFlag = false;
+    },
+    show() {
+      this.showFlag = true;
+    },
+    switchItem(index) {
+      this.currentIndex = index;
+    },
+    selectSong(song, index) {
+      // 当前播放歌曲 肯定和最近播放列表中第一首歌相同
+      if (index !== 0) {
+        this.insertSong(new Song(song));
+      }
+    },
+    selectSuggest() {
+      this.saveSearch();
+    },
+    ...mapActions(["insertSong"])
+  },
+  computed: {
+    ...mapGetters(["playHistory", ""])
+  }
+};
+</script>
+<style lang="stylus" scoped>
+@import '~@/common/stylus/variable'
+@import '~@/common/stylus/mixin'
+
+.add-song {
+  position: fixed
+  top: 0
+  right: 0
+  bottom: 0
+  left: 0
+  z-index: 200
+  background: $color-background
+
+  .header {
+    .text {
+      position: absolute
+      right: 10%
+      width: 80%
+      no-wrap()
+      text-align: center
+      font-size: $font-size-large
+    }
+
+    .close {
+      position: absolute
+      top: 0
+      right: 12px
+
+      px, .icon-close {
+        display: blcok
+        padding: 10px
+        color: $color-theme
+        font-size: $font-size-large
+      }
+    }
+  }
+
+  .search-box-wrapper {
+    margin: 40px 20px 20px
+  }
+
+  .shortcut {
+    .list-wrapper {
+      position: absolute
+      top: 130px
+      bottom: 0
+      width: 100%
+
+      .list-scroll {
+        overflow: hidden
+        height: 100%
+
+        .list-inner {
+          padding: 20px 30px
+        }
+      }
+    }
+  }
+}
+</style>
