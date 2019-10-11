@@ -49,6 +49,7 @@ module.exports = {
 
   build: {
     // Template for index.html
+    port: 9000,
     index: path.resolve(__dirname, '../dist/index.html'),
 
     // Paths

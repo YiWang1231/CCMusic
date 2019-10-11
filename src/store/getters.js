@@ -20,9 +20,9 @@ export const currentSong = (state) => {
 export const disc = state => state.disc
 // 当前的toplist
 export const topList = state => state.topList
-
 // 搜索历史
 export const searchHistory = state => state.searchHistory
-
 // 播放历史
 export const playHistory = state => state.playHistory
+// 喜欢的歌曲
+export const likeList = state => state.likeList

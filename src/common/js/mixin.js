@@ -35,7 +35,7 @@ export const playerMixin = {
                     ? `icon-loop`
                     : `icon-random`;
         },
-        ...mapGetters(["sequenceList", "currentSong", "playList", "mode"]),
+        ...mapGetters(["sequenceList", "currentSong", "playList", "mode", "likeList"]),
     },
     methods: {
         ...mapMutations({
@@ -43,6 +43,20 @@ export const playerMixin = {
             setPlayMode: "SET_PLAY_MODE",
             setPlayList: "SET_PLAY_LIST"
         }),
+        ...mapActions(['saveLikeSong', 'unLikeSong']),
+        toggleLike(song) {
+            console.log(this.isLike(song))
+            return this.isLike(song) ? this.unLikeSong(song) : this.saveLikeSong(song)
+        },
+        getLikeIcon(song) {
+            return this.isLike(song) ? 'icon-favorite' : 'icon-not-favorite'
+        },
+        isLike(song) {
+            let index = this.likeList.findIndex((item) => {
+                return item.id === song.id
+            })
+            return index > -1
+        },
         changeMode() {
             // pretty tricky！！！！
             const mode = (this.mode + 1) % 3;
@@ -70,7 +84,8 @@ export const playerMixin = {
 export const searchMixin = {
     data() {
         return {
-            query: ""
+            query: "",
+            refreshDelay: 100
         }
     },
     computed: {
@@ -92,7 +107,7 @@ export const searchMixin = {
             this.saveSearchHistory(this.query);
         },
         ...mapActions([
-            'saveSeachHistory',
+            'saveSearchHistory',
             "deleteSearchHistory",
         ])
     }

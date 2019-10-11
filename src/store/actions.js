@@ -1,4 +1,4 @@
-import { saveSearch, deleteSearch, clearSearch, savePlay } from "@/common/js/cache"
+import { saveSearch, deleteSearch, clearSearch, savePlay, saveLike, unLike } from "@/common/js/cache"
 import * as types from "./mutation-types"
 import { playMode } from "@/common/js/config"
 import { shuffle } from "@/common/js/util"
@@ -31,6 +31,7 @@ export const selectPlay = function ({ commit, state }, { list, index }) {
 export const randomPlay = function ({ commit }, { list }) {
     commit(types.SET_PALY_MODE, playMode.random)
     commit(types.SET_SEQUENCE_LIST, list)
+    console.log(list)
     let randomList = shuffle(list)
     commit(types.SET_PLAY_LIST, randomList)
     commit(types.SET_CURRENT_INDEX, 0)
@@ -76,6 +77,14 @@ export const insertSong = function ({ commit, state }, song) {
     commit(types.SET_CURRENT_INDEX, currentIndex)
     commit(types.SET_FULL_SCREEN, true)
     commit(types.SET_PLAYING_STATE, true)
+}
+
+export const saveLikeSong = function ({ commit }, song) {
+    commit(types.SET_LIKE_LIST, saveLike(song))
+}
+
+export const unLikeSong = function ({ commit }, song) {
+    commit(types.SET_LIKE_LIST, unLike(song))
 }
 
 export const saveSearchHistory = function ({ commit }, query) {

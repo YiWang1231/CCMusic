@@ -21,3 +21,5 @@ export const SET_TOP_LIST = 'SET_TOP_LIST'
 export const SET_SEARCH_HISTORY = 'SET_SEARCH_HISTORY'
 // 设置播放历史
 export const SET_PLAY_HISTORY = 'SET_PLAY_HISTORY'
+// 设置喜欢的歌曲列表
+export const SET_LIKE_LIST = 'SET_LIKE_LIST'

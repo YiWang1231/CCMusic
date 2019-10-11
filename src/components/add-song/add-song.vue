@@ -1,5 +1,5 @@
 <template>
-  <transition>
+  <transition name="slide">
     <div class="add-song" v-show="showFlag">
       <div class="header">
         <span class="text">添加歌曲播放列表</span>
@@ -13,7 +13,7 @@
       <div class="shortcut" v-show="!query">
         <switches :switches="switches" :currentIndex="currentIndex" @switch="switchItem"></switches>
         <div class="list-wrapper">
-          <scroll class="list-scroll" v-if="currentIndex===0">
+          <scroll class="list-scroll" v-if="currentIndex===0" :data="playHistory">
             <div class="list-inner">
               <song-list :songs="playHistory" @select="selectSong"></song-list>
             </div>
@@ -37,6 +37,12 @@
           @select="selectSuggest"
         ></suggest>
       </div>
+      <topTip ref="topTip">
+        <div class="tipTitle">
+          <i class="icon-ok"></i>
+          <span class="text">添加歌曲成功</span>
+        </div>
+      </topTip>
     </div>
   </transition>
 </template>
@@ -50,6 +56,7 @@ import Scroll from "@/base/scroll/scroll";
 import SongList from "@/base/song-list/song-list";
 import { mapGetters, mapActions } from "vuex";
 import Song from "@/common/js/song";
+import topTip from "@/base/top-tip/top-tip";
 export default {
   mixins: [searchMixin],
   data() {
@@ -73,7 +80,8 @@ export default {
     Switches,
     SearchHistory,
     Scroll,
-    SongList
+    SongList,
+    topTip
   },
   methods: {
     hide() {
@@ -88,16 +96,22 @@ export default {
     selectSong(song, index) {
       // 当前播放歌曲 肯定和最近播放列表中第一首歌相同
       if (index !== 0) {
+        // 传入的song并不是song的实例 而仅仅是一个对象
         this.insertSong(new Song(song));
+        this.showTip();
       }
+    },
+    showTip() {
+      this.$refs.topTip.show();
     },
     selectSuggest() {
       this.saveSearch();
+      this.showTip();
     },
     ...mapActions(["insertSong"])
   },
   computed: {
-    ...mapGetters(["playHistory", ""])
+    ...mapGetters(["playHistory"])
   }
 };
 </script>
@@ -108,13 +122,22 @@ export default {
 .add-song {
   position: fixed
   top: 0
-  right: 0
   bottom: 0
-  left: 0
   z-index: 200
+  width: 100%
   background: $color-background
 
+  &.slide-enter-active, &.slide-leave-active {
+    transition: all 0.4s
+  }
+
+  &.slide-enter, &.slide-leave-to {
+    transform: translate3d(0, 100%, 0)
+  }
+
   .header {
+    line-height: 44px
+
     .text {
       position: absolute
       right: 10%
@@ -129,7 +152,7 @@ export default {
       top: 0
       right: 12px
 
-      px, .icon-close {
+      .icon-close {
         display: blcok
         padding: 10px
         color: $color-theme
@@ -139,13 +162,13 @@ export default {
   }
 
   .search-box-wrapper {
-    margin: 40px 20px 20px
+    margin: 50px 20px 20px
   }
 
   .shortcut {
     .list-wrapper {
       position: absolute
-      top: 130px
+      top: 165px
       bottom: 0
       width: 100%
 
@@ -157,6 +180,22 @@ export default {
           padding: 20px 30px
         }
       }
+    }
+  }
+
+  .tipTitle {
+    padding: 18px 0
+    text-align: center
+
+    .icon-ok {
+      margin-right: 4px
+      color: $color-theme
+      font-size: $font-size-medium
+    }
+
+    .text {
+      color: $color-theme
+      font-size: $font-size-medium
     }
   }
 }

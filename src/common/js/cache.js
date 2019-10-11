@@ -2,8 +2,12 @@ import storage from "good-storage"
 
 const SEARCH_KEY = '__search__'
 const SEARCH_MAX_LENGTH = 15
+
 const PLAY_KEY = '__play__'
 const PLAY_MAX_LENGTH = 100
+
+const LIKE_KEY = '__like__'
+const LIKE_MAX_LENGTH = 100
 
 // 数组array操作
 // 按照index删除 arr.splice(index, 1)
@@ -17,8 +21,10 @@ function insertArray(arr, val, compare, maxLen) {
     if (index > 0) {
         arr.splice(index, 1)
     }
+    // unshift 插入到第一个元素
     arr.unshift(val)
     if (maxLen && arr.length > maxLen) {
+        // pop删除列表最后一个元素
         arr.pop()
     }
 }
@@ -29,6 +35,16 @@ function deleteFromArray(arr, compare) {
         arr.splice(index, 1)
     }
 }
+
+export function saveLike(song) {
+    let songs = storage.get(LIKE_KEY, [])
+    insertArray(songs, song, (item) => {
+        return item.id === song.id
+    }, LIKE_MAX_LENGTH)
+    storage.set(LIKE_KEY, songs)
+    return songs
+}
+
 
 export function savePlay(song) {
     let playHistory = storage.get(PLAY_KEY, [])
@@ -60,10 +76,27 @@ export function deleteSearch(query) {
     return searches
 }
 
+export function unLike(song) {
+    let songs = storage.get(LIKE_KEY, [])
+    deleteFromArray(songs, (item) => {
+        return item.id === song.id
+    })
+    storage.set(LIKE_KEY, songs)
+    return songs
+}
+
 export function clearSearch() {
     return storage.set(SEARCH_KEY, [])
 }
 
 export function loadSearch() {
     return storage.get(SEARCH_KEY, [])
+}
+
+export function loadPlay() {
+    return storage.get(PLAY_KEY, [])
+}
+
+export function loadLike() {
+    return storage.get(LIKE_KEY, [])
 }

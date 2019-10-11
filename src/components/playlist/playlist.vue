@@ -6,12 +6,17 @@
           <h1 class="title">
             <i class="icon" :class="iconMode" @click="changeMode"></i>
             <span class="text">{{ modeText }}</span>
-            <span class="clear">
+            <span class="clear" @click="showConfirm">
               <i class="icon-clear"></i>
             </span>
           </h1>
         </div>
-        <scroll class="list-content" :data="sequenceList" ref="listContent">
+        <scroll
+          class="list-content"
+          :data="sequenceList"
+          ref="listContent"
+          :refreshDelay="refreshDelay"
+        >
           <transition-group name="list" tag="ul">
             <li
               ref="listItem"
@@ -22,8 +27,8 @@
             >
               <i class="current" :class="getCurrentIcon(song)"></i>
               <span class="text">{{ song.name }}</span>
-              <span class="like">
-                <i class="icon-not-favorite"></i>
+              <span class="like" @click.stop="toggleLike(song)">
+                <i :class="getLikeIcon(song)"></i>
               </span>
               <span class="delete" @click.stop="deleteOne(song)">
                 <i class="icon-delete"></i>
@@ -58,7 +63,8 @@ export default {
   mixins: [playerMixin],
   data() {
     return {
-      showFlag: false
+      showFlag: false,
+      refreshDelay: 100
     };
   },
   components: {
@@ -132,6 +138,7 @@ export default {
       if (!this.showFlag || newSong.id === oldSong.id) {
         return;
       }
+      console.log(newSong);
       this.scrollToCurrent(newSong);
     }
   }

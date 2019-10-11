@@ -80,7 +80,7 @@
               <i class="icon-next" @click="nextSong"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon-not-favorite"></i>
+              <i @click="toggleLike(currentSong) " :class="getLikeIcon(currentSong)"></i>
             </div>
           </div>
         </div>
@@ -109,7 +109,7 @@
     <audio
       :src="songUrl"
       ref="audio"
-      @canplay="ready"
+      @play="ready"
       @error="error"
       @timeupdate="updateTime"
       @ended="end"
@@ -248,6 +248,10 @@ export default {
       this.currentSong
         .getSongLyric()
         .then(lyric => {
+          // getSongLyric后可以获取一个lyric字段
+          if (this.currentSong.lyric !== lyric) {
+            return;
+          }
           this.currentLyric = new Lyric(lyric, this.handleLyric);
           if (this.playing) {
             this.currentLyric.play();
@@ -291,6 +295,7 @@ export default {
       }
       if (this.playList.length === 1) {
         this.loop();
+        return;
       }
       let index = this.currentIndex + 1;
       if (index === this.playList.length) {
@@ -306,6 +311,7 @@ export default {
       }
       if (this.playList.length === 1) {
         this.loop();
+        return;
       }
       let index = this.currentIndex - 1;
       if (index === -1) {
@@ -316,7 +322,9 @@ export default {
       this.songReady = false;
     },
     ready() {
+      // ready 函数是歌曲audio.play函数触发后 才会执行 将songReady设置为true 防止用户快速点击
       this.songReady = true;
+      this.savePlayHistory(this.currentSong);
     },
     error() {
       // 歌曲无法播放也允许点击
@@ -426,42 +434,42 @@ export default {
   },
   watch: {
     currentSong(newSong, oldSong) {
-      if (newSong.id) {
-        this.savePlayHistory(newSong);
-      }
-      if (newSong.id === oldSong.id || !newSong.id) {
+      if (!newSong.id) {
         return;
       }
-
+      if (newSong.id === oldSong.id) {
+        return;
+      }
       if (this.currentLyric) {
         console.log("有歌词 需要删除");
         this.currentLyric.stop();
+        this.currentTime = 0;
+        this.playingLyric = "";
+        this.currentLineNum = 0;
       }
+      // 重置计时器，类似于节流，每次重新操作重新开始计时器工作
       // 播放前在添加歌曲播放的URL 提高运算效率
       // 需要将url 从promise对象中获取出来
       getSongUrl(newSong).then(url => {
         this.songUrl = url;
       });
-
-      setTimeout(() => {
-        console.log(!this.songUrl);
-        if (this.songUrl) {
-          this.songReady = true;
-          this.$refs.audio.play();
-          this.setPlayingState(true);
-          this.getLyric();
-        } else {
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        // 如果无法获取有效链接则 自动播放下一首歌
+        if (!this.songUrl) {
           setTimeout(() => {
+            this.songReady = true;
             this.nextSong();
           }, 200);
         }
-      }, 500);
+        this.$refs.audio.play();
+        this.setPlayingState(true);
+        this.getLyric();
+      }, 1000);
     },
     playing(newPlaying) {
-      setTimeout(() => {
-        const audio = this.$refs.audio;
-        newPlaying ? audio.play() : audio.pause();
-      }, 500);
+      const audio = this.$refs.audio;
+      newPlaying ? audio.play() : audio.pause();
     }
   }
 };

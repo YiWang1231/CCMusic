@@ -23,7 +23,9 @@ export default class Song {
         return new Promise((resolve, reject) => {
             getSongLyric(this.mid).then((res) => {
                 if (res.retcode === ERR_OK) {
+                    // 为歌曲添加lyric字段
                     this.lyric = Base64.decode(res.lyric)
+                    // 将lyric re
                     resolve(this.lyric)
                 } else {
                     reject('np lyric')
